@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::{collections::HashMap, env, fs, iter::repeat};
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
@@ -44,15 +44,27 @@ fn separate_id_lists(input: &str) -> (Vec<i32>, Vec<i32>) {
     (left, right)
 }
 
-fn id_list_difference(left: &Vec<i32>, right: &Vec<i32>) -> i32 {
+fn id_list_difference(left: &[i32], right: &[i32]) -> i32 {
     left.iter()
         .zip(right.iter())
         .map(|(l, r)| if l > r { l - r } else { r - l })
         .sum()
 }
 
-fn similarity_score(left: &Vec<i32>, right: &Vec<i32>) -> i32 {
-    left.iter()
-        .map(|l| l * right.iter().filter(|r| *r == l).count() as i32)
+fn similarity_score(left: &[i32], right: &[i32]) -> i32 {
+    let mut freq_map: HashMap<i32, i32> = HashMap::from_iter(
+        left.iter()
+            .map(|n| n.to_owned())
+            .zip(repeat(0))
+            .collect::<Vec<(i32, i32)>>(),
+    );
+
+    for l in left {
+        freq_map.insert(*l, freq_map[l] + 1);
+    }
+
+    freq_map
+        .iter()
+        .map(|(k, v)| k * v * right.iter().filter(|r| **r == *k).count() as i32)
         .sum()
 }
