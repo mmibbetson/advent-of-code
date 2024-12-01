@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, fs, iter::repeat};
+use std::{collections::HashMap, env, fs};
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
@@ -6,7 +6,7 @@ fn main() {
 
     println!("Finding solution for: {input_file}");
 
-    let input = fs::read_to_string(&args[1]).expect("Failed to read input file.");
+    let input = fs::read_to_string(&args[1]).expect("Failed to read input file");
     let (left, right) = separate_id_lists(&input);
     let diff_sum = id_list_difference(&left, &right);
     let sim_score = similarity_score(&left, &right);
@@ -16,30 +16,36 @@ fn main() {
 }
 
 fn separate_id_lists(input: &str) -> (Vec<i32>, Vec<i32>) {
-    let (mut left, mut right) = input
-        .lines()
-        .map(|l| {
-            let mut iter = l
-                .split_whitespace()
-                .map(|c| c.parse::<i32>().expect("Failed to parse location ID!"));
+    let mut left = Vec::new();
+    let mut right = Vec::new();
 
-            (
-                iter.next().expect("There was no first ID on a line."),
-                iter.next().expect("There was no second ID on a line."),
-            )
-        })
-        .fold(
-            (Vec::new(), Vec::new()),
-            |(mut acc_l, mut acc_r), (cur_l, cur_r)| {
-                acc_l.push(cur_l);
-                acc_r.push(cur_r);
+    for line in input.lines() {
+        let (l, r) = parse_line(line);
 
-                (acc_l, acc_r)
-            },
-        );
+        left.push(l);
+        right.push(r);
+    }
 
     left.sort();
     right.sort();
+
+    (left, right)
+}
+
+fn parse_line(line: &str) -> (i32, i32) {
+    let mut parts = line.split_whitespace();
+
+    let left = parts
+        .next()
+        .unwrap()
+        .parse()
+        .expect("There was no first location ID on a line.");
+
+    let right = parts
+        .next()
+        .unwrap()
+        .parse()
+        .expect("There was no second location ID on a line.");
 
     (left, right)
 }
@@ -52,19 +58,20 @@ fn id_list_difference(left: &[i32], right: &[i32]) -> i32 {
 }
 
 fn similarity_score(left: &[i32], right: &[i32]) -> i32 {
-    let mut freq_map: HashMap<i32, i32> = HashMap::from_iter(
-        left.iter()
-            .map(|n| n.to_owned())
-            .zip(repeat(0))
-            .collect::<Vec<(i32, i32)>>(),
-    );
+    let freq_left = left.iter().fold(HashMap::new(), |mut acc, &cur| {
+        *acc.entry(cur).or_insert(0) += 1;
 
-    for l in left {
-        freq_map.insert(*l, freq_map[l] + 1);
-    }
+        acc
+    });
 
-    freq_map
+    let freq_right = right.iter().fold(HashMap::new(), |mut acc, &cur| {
+        *acc.entry(cur).or_insert(0) += 1;
+
+        acc
+    });
+
+    freq_left
         .iter()
-        .map(|(k, v)| k * v * right.iter().filter(|r| **r == *k).count() as i32)
+        .map(|(&k, &v)| k * v * freq_right.get(&k).cloned().unwrap_or(0))
         .sum()
 }
