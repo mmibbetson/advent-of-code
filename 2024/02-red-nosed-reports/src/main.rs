@@ -20,10 +20,12 @@ fn main() {
             .collect::<Vec<_>>()
     });
 
-    let dampened = reports.clone().map(|r| get_dampened_variants(&r));
-
-    let safe_report_count = reports.clone().filter(|l| is_safe(l)).count();
-    let safe_report_count_dampened = reports.filter(|l| is_safe_dampened(l)).count();
+    let safe_report_count = reports.clone().filter(|r| is_safe(r)).count();
+    let safe_report_count_dampened = reports
+        .clone()
+        .map(|r| get_dampened_variants(&r))
+        .filter(|v| v.iter().any(|r| is_safe(&r)))
+        .count();
 
     println!("The number of safe reports is:\n\n    {safe_report_count}\n");
     println!(
@@ -41,27 +43,6 @@ fn is_safe(levels: &[i32]) -> bool {
             let diffs = is_valid_diff(*acc, *cur);
             let dirs = get_direction(*acc, *cur);
 
-            // I hate this so much.
-            *acc = *cur;
-
-            Some((diffs, dirs))
-        })
-        .unzip();
-
-    diffs.iter().all(|d| *d == true) && dirs.iter().all(|d| *d == direction)
-}
-
-fn is_safe_dampened(levels: &[i32]) -> bool {
-    let direction = get_direction(levels[0], levels[1]);
-
-    let (diffs, dirs): (Vec<bool>, Vec<Direction>) = levels
-        .iter()
-        .skip(1)
-        .scan(levels[0], |acc, cur| {
-            let diffs = is_valid_diff(*acc, *cur);
-            let dirs = get_direction(*acc, *cur);
-
-            // I hate this so much.
             *acc = *cur;
 
             Some((diffs, dirs))
@@ -86,6 +67,7 @@ fn get_dampened_variants(levels: &[i32]) -> Vec<Vec<i32>> {
         }
     }
 
+    variants.push(levels.into());
     variants
 }
 
