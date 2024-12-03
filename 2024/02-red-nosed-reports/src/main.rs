@@ -20,7 +20,9 @@ fn main() {
             .collect::<Vec<_>>()
     });
 
-    let safe_report_count = reports.filter(|l| is_safe(l)).count();
+    let dampened = reports.clone().map(|r| get_dampened_variants(&r));
+
+    let safe_report_count = reports.clone().filter(|l| is_safe(l)).count();
     let safe_report_count_dampened = reports.filter(|l| is_safe_dampened(l)).count();
 
     println!("The number of safe reports is:\n\n    {safe_report_count}\n");
@@ -70,15 +72,21 @@ fn is_safe_dampened(levels: &[i32]) -> bool {
 }
 
 fn get_dampened_variants(levels: &[i32]) -> Vec<Vec<i32>> {
-    let mut result = Vec::from(Vec::new().repeat(levels.len()));
+    let mut variants = Vec::new();
 
-    for (idx, val) in levels.iter().enumerate() {
-        let dropped = ;
-
-        result[idx].push(dropped);
+    for _ in levels {
+        variants.push(Vec::new());
     }
 
-    result
+    for (idx, val) in levels.iter().enumerate() {
+        for (res_idx, res_val) in variants.iter_mut().enumerate() {
+            if res_idx != idx {
+                res_val.push(*val);
+            }
+        }
+    }
+
+    variants
 }
 
 fn get_direction(fst: i32, snd: i32) -> Direction {
