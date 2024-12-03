@@ -1,0 +1,10 @@
+[package]
+name = "day-3-2024"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[[bin]]
+name = "solution"
+path = "./src/main.rs"
