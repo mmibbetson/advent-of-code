@@ -14,22 +14,27 @@ fn main() {
     println!("Finding solution for: {input_file}");
 
     let input = fs::read_to_string(&args[1]).expect("Failed to read input file");
-    let safe_report_count = input.lines().filter(|l| is_safe(l)).count();
+    let reports = input.lines().map(|r| {
+        r.split_whitespace()
+            .map(|n| n.parse::<i32>().expect("Failed to parse level value"))
+            .collect::<Vec<_>>()
+    });
+
+    let safe_report_count = reports.filter(|l| is_safe(l)).count();
+    let safe_report_count_dampened = reports.filter(|l| is_safe_dampened(l)).count();
 
     println!("The number of safe reports is:\n\n    {safe_report_count}\n");
+    println!(
+        "The number of safe reports after dampening is:\n\n    {safe_report_count_dampened}\n"
+    );
 }
 
-fn is_safe(report: &str) -> bool {
-    let levels = report
-        .split_whitespace()
-        .map(|n| n.parse::<i32>().expect("Failed to parse level value"))
-        .collect::<Vec<_>>();
+fn is_safe(levels: &[i32]) -> bool {
     let direction = get_direction(levels[0], levels[1]);
 
     let (diffs, dirs): (Vec<bool>, Vec<Direction>) = levels
         .iter()
         .skip(1)
-        // TODO: Somewhere before unzipping, can try applying the Problem Dampener.
         .scan(levels[0], |acc, cur| {
             let diffs = is_valid_diff(*acc, *cur);
             let dirs = get_direction(*acc, *cur);
@@ -42,6 +47,38 @@ fn is_safe(report: &str) -> bool {
         .unzip();
 
     diffs.iter().all(|d| *d == true) && dirs.iter().all(|d| *d == direction)
+}
+
+fn is_safe_dampened(levels: &[i32]) -> bool {
+    let direction = get_direction(levels[0], levels[1]);
+
+    let (diffs, dirs): (Vec<bool>, Vec<Direction>) = levels
+        .iter()
+        .skip(1)
+        .scan(levels[0], |acc, cur| {
+            let diffs = is_valid_diff(*acc, *cur);
+            let dirs = get_direction(*acc, *cur);
+
+            // I hate this so much.
+            *acc = *cur;
+
+            Some((diffs, dirs))
+        })
+        .unzip();
+
+    diffs.iter().all(|d| *d == true) && dirs.iter().all(|d| *d == direction)
+}
+
+fn get_dampened_variants(levels: &[i32]) -> Vec<Vec<i32>> {
+    let mut result = Vec::from(Vec::new().repeat(levels.len()));
+
+    for (idx, val) in levels.iter().enumerate() {
+        let dropped = ;
+
+        result[idx].push(dropped);
+    }
+
+    result
 }
 
 fn get_direction(fst: i32, snd: i32) -> Direction {
