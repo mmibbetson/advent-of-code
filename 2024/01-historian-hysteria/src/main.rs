@@ -8,8 +8,8 @@ fn main() {
 
     let input = fs::read_to_string(&args[1]).expect("Failed to read input file");
     let (left, right) = separate_id_lists(&input);
-    let diff_sum = id_list_difference(&left, &right);
     let sim_score = similarity_score(&left, &right);
+    let diff_sum = id_list_difference(&left, &right);
 
     println!("The similarity score for these lists is:\n\n    {sim_score}\n");
     println!("The total sum of the differences of the location ID's is:\n\n    {diff_sum}\n");
@@ -74,4 +74,32 @@ fn similarity_score(left: &[i32], right: &[i32]) -> i32 {
         .iter()
         .map(|(&k, &v)| k * v * freq_right.get(&k).cloned().unwrap_or(0))
         .sum()
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{id_list_difference, separate_id_lists, similarity_score};
+
+    #[test]
+    fn example_input() {
+        // Arrange
+        let input = r#"3   4
+4   3
+2   5
+1   3
+3   9
+3   3
+"#;
+        let expected_sim_score = 31;
+        let expected_list_diff = 11;
+
+        // Act
+        let (left, right) = separate_id_lists(&input);
+        let result_1 = similarity_score(&left, &right);
+        let result_2 = id_list_difference(&left, &right);
+
+        // Assert
+        assert_eq!(result_1, expected_sim_score);
+        assert_eq!(result_2, expected_list_diff);
+    }
 }
