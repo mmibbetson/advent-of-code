@@ -7,11 +7,14 @@ fn main() {
     println!("Finding solution for: {input_file}");
 
     let input = fs::read_to_string(&args[1]).expect("Failed to read input file");
-    let ocurrences = xmas_occurrences(&input);
+    let occurrences = xmas_occurrences(&input);
 }
 
 fn xmas_occurrences(input: &str) -> usize {
     todo!()
+    // Could take the obvious brute force approach of finding the index of every 'X' and then
+    // checking the cardinals & intercardinals to build up instances of "XMAS".
+    // This could be done with mutatble state and array subscripting, but also potentially recursively with pattern matching.
 }
 
 #[cfg(test)]
