@@ -16,20 +16,17 @@ fn main() {
 }
 
 fn separate_id_lists(input: &str) -> (Vec<i32>, Vec<i32>) {
-    let mut left = Vec::new();
-    let mut right = Vec::new();
+    input
+        .lines()
+        .fold((Vec::new(), Vec::new()), |(mut acc_l, mut acc_r), line| {
+            let (l, r) = parse_line(line);
 
-    for line in input.lines() {
-        let (l, r) = parse_line(line);
+            acc_l.push(l);
+            acc_r.push(r);
 
-        left.push(l);
-        right.push(r);
-    }
-
-    left.sort();
-    right.sort();
-
-    (left, right)
+            (acc_l, acc_r)
+        })
+        .inspect(|v| v.sort())
 }
 
 fn parse_line(line: &str) -> (i32, i32) {

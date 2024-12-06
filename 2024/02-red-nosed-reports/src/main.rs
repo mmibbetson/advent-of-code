@@ -81,6 +81,7 @@ fn is_valid_diff(fst: i32, snd: i32) -> bool {
     diff >= 1 && diff <= 3
 }
 
+// TODO: Refactor to be more declarative.
 fn get_dampened_variants(levels: &[i32]) -> Vec<Vec<i32>> {
     let mut variants = Vec::new();
 
